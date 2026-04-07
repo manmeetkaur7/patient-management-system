@@ -1,0 +1,11 @@
+[
+  {
+    "id": "1775589643722",
+    "fullName": "John",
+    "age": "23",
+    "gender": "Male",
+    "phone": "916-555-9999",
+    "email": "John12345@gmail.com",
+    "medicalCondition": "Diabetes"
+  }
+]
