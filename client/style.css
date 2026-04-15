@@ -19,22 +19,68 @@ h2 {
   text-align: center;
 }
 
-form {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
+.search-form {
+  display: flex;
+  flex-wrap: wrap;
   gap: 12px;
+  align-items: center;
   margin-bottom: 30px;
 }
 
-form input,
-form button {
+.search-form input {
+  flex: 1;
+  min-width: 240px;
   padding: 10px;
   font-size: 14px;
 }
 
-form button {
-  grid-column: span 2;
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+  margin-bottom: 30px;
+}
+
+.form-grid input,
+.form-grid select,
+.form-grid button {
+  padding: 10px;
+  font-size: 14px;
+}
+
+button {
   cursor: pointer;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 4px;
+  background-color: #2563eb;
+  color: #fff;
+  font-weight: 600;
+}
+
+button.secondary {
+  background-color: #e2e8f0;
+  color: #1f2937;
+}
+
+button.delete-btn {
+  background-color: #ef4444;
+  color: #fff;
+}
+
+.form-actions {
+  display: flex;
+  gap: 10px;
+  grid-column: 1 / -1;
+  flex-wrap: wrap;
+}
+
+.form-actions.inline {
+  justify-content: flex-start;
+}
+
+.hidden {
+  display: none;
 }
 
 table {
@@ -54,7 +100,39 @@ td {
   text-align: center;
 }
 
-button.delete-btn {
-  padding: 6px 10px;
-  cursor: pointer;
+.actions {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.appointments {
+  margin-top: 40px;
+}
+
+.appointment-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.appointment-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 12px;
+  background: #f8fafc;
+}
+
+.appointment-card h4 {
+  margin: 0 0 8px 0;
+}
+
+.status {
+  text-align: center;
+  margin-top: 10px;
+}
+
+.muted {
+  color: #6b7280;
+  text-align: center;
 }

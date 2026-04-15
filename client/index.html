@@ -10,31 +10,73 @@
   <div class="container">
     <h1>Patient Management System</h1>
 
-    <form id="patientForm">
-      <input type="text" id="fullName" placeholder="Full Name" required />
-      <input type="number" id="age" placeholder="Age" required />
-      <input type="text" id="gender" placeholder="Gender" required />
-      <input type="text" id="phone" placeholder="Phone Number" required />
-      <input type="email" id="email" placeholder="Email" required />
-      <input type="text" id="medicalCondition" placeholder="Medical Condition" required />
-      <button type="submit">Add Patient</button>
-    </form>
+    <section class="search-section">
+      <form id="searchForm" class="search-form">
+        <input
+          type="text"
+          id="searchInput"
+          placeholder="Search by name, phone, email, or condition"
+          aria-label="Search patients"
+        />
+        <div class="form-actions inline">
+          <button type="submit">Search</button>
+          <button type="button" id="clearSearchBtn" class="secondary">Clear</button>
+        </div>
+      </form>
+    </section>
 
-    <h2>Patient Records</h2>
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Age</th>
-          <th>Gender</th>
-          <th>Phone</th>
-          <th>Email</th>
-          <th>Condition</th>
-          <th>Action</th>
-        </tr>
-      </thead>
-      <tbody id="patientTableBody"></tbody>
-    </table>
+    <section>
+      <h2>Patient Details</h2>
+      <form id="patientForm" class="form-grid">
+        <input type="text" id="fullName" placeholder="Full Name" required />
+        <input type="number" id="age" placeholder="Age" required />
+        <input type="text" id="gender" placeholder="Gender" required />
+        <input type="text" id="phone" placeholder="Phone Number" required />
+        <input type="email" id="email" placeholder="Email" required />
+        <input type="text" id="medicalCondition" placeholder="Medical Condition" required />
+        <div class="form-actions">
+          <button type="submit" id="submitBtn">Add Patient</button>
+          <button type="button" id="cancelEditBtn" class="secondary hidden">Cancel Edit</button>
+        </div>
+      </form>
+    </section>
+
+    <section>
+      <h2>Patient Records</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Age</th>
+            <th>Gender</th>
+            <th>Phone</th>
+            <th>Email</th>
+            <th>Condition</th>
+            <th>Next Appointment</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="patientTableBody"></tbody>
+      </table>
+      <p id="patientStatus" class="status muted hidden"></p>
+    </section>
+
+    <section class="appointments">
+      <h2>Schedule Appointment</h2>
+      <form id="appointmentForm" class="form-grid">
+        <select id="appointmentPatient" required>
+          <option value="">Select patient</option>
+        </select>
+        <input type="date" id="appointmentDate" required />
+        <input type="time" id="appointmentTime" required />
+        <input type="text" id="appointmentReason" placeholder="Reason" required />
+        <div class="form-actions">
+          <button type="submit">Schedule Appointment</button>
+        </div>
+      </form>
+
+      <div id="appointmentList" class="appointment-list"></div>
+    </section>
   </div>
 
   <script src="script.js"></script>

@@ -6,6 +6,27 @@
     "gender": "Male",
     "phone": "916-555-9999",
     "email": "John12345@gmail.com",
-    "medicalCondition": "Diabetes"
+    "medicalCondition": "Diabetes",
+    "appointments": []
+  },
+  {
+    "id": "1775590762508",
+    "fullName": "Singh",
+    "age": "67",
+    "gender": "Male",
+    "phone": "897-909-1234",
+    "email": "singh789@gmail.com",
+    "medicalCondition": "n/a",
+    "appointments": []
+  },
+  {
+    "id": "1775591551253",
+    "fullName": "Mona",
+    "age": "19",
+    "gender": "Female",
+    "phone": "789-000-0001",
+    "email": "Mona@gmail.com",
+    "medicalCondition": "Cancer",
+    "appointments": []
   }
 ]
