@@ -13,7 +13,22 @@ const appointmentReason = document.getElementById("appointmentReason");
 const appointmentList = document.getElementById("appointmentList");
 const patientStatus = document.getElementById("patientStatus");
 
-const API_URL = "http://localhost:5000/api/patients";
+function getApiBaseUrl() {
+  const configuredUrl = (window.PATIENT_API_BASE_URL || "").trim();
+
+  if (configuredUrl) {
+    return configuredUrl.replace(/\/$/, "");
+  }
+
+  const isLocalFrontend =
+    window.location.protocol === "file:" ||
+    (["localhost", "127.0.0.1"].includes(window.location.hostname) &&
+      window.location.port !== "5000");
+
+  return isLocalFrontend ? "http://localhost:5000" : "";
+}
+
+const API_URL = `${getApiBaseUrl()}/api/patients`;
 
 let editingPatientId = null;
 let currentSearchTerm = "";
@@ -23,11 +38,26 @@ let allPatientsCache = [];
 async function fetchPatients() {
   try {
     const response = await fetch(API_URL);
-    allPatientsCache = await response.json();
+
+    if (!response.ok) {
+      throw new Error(`HTTP error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log("Fetched patients:", data);
+
+    if (Array.isArray(data)) {
+      allPatientsCache = data;
+    } else if (data && Array.isArray(data.patients)) {
+      allPatientsCache = data.patients;
+    } else {
+      throw new Error("API did not return patient data in array format");
+    }
+
     applyFilters();
   } catch (error) {
     console.error("Failed to fetch patients", error);
-    updatePatientStatus("Unable to load patients. Ensure the API server is running.");
+    updatePatientStatus(`Unable to load patients: ${error.message}`);
   }
 }
 
@@ -85,12 +115,12 @@ function renderPatients(patients) {
     const nextAppt = getNextAppointment(patient.appointments || []);
 
     row.innerHTML = `
-      <td>${patient.fullName}</td>
-      <td>${patient.age}</td>
-      <td>${patient.gender}</td>
-      <td>${patient.phone}</td>
-      <td>${patient.email}</td>
-      <td>${patient.medicalCondition}</td>
+      <td>${patient.fullName || ""}</td>
+      <td>${patient.age || ""}</td>
+      <td>${patient.gender || ""}</td>
+      <td>${patient.phone || ""}</td>
+      <td>${patient.email || ""}</td>
+      <td>${patient.medicalCondition || ""}</td>
       <td>${formatAppointment(nextAppt)}</td>
       <td class="actions">
         <button class="secondary" onclick="editPatient('${patient.id}')">Edit</button>
@@ -168,7 +198,7 @@ function getNextAppointment(appointments) {
 }
 
 function formatAppointment(appointment) {
-  if (!appointment) return "?";
+  if (!appointment) return "No appointment";
   const reasonText = appointment.reason ? ` - ${appointment.reason}` : "";
   return `${appointment.date} ${appointment.time}${reasonText}`;
 }
@@ -188,17 +218,26 @@ form.addEventListener("submit", async (e) => {
   const endpoint = editingPatientId ? `${API_URL}/${editingPatientId}` : API_URL;
   const method = editingPatientId ? "PUT" : "POST";
 
-  await fetch(endpoint, {
-    method,
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(patientPayload),
-  });
+  try {
+    const response = await fetch(endpoint, {
+      method,
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(patientPayload),
+    });
 
-  form.reset();
-  exitEditMode();
-  fetchPatients();
+    if (!response.ok) {
+      throw new Error(`Failed to save patient: ${response.status}`);
+    }
+
+    form.reset();
+    exitEditMode();
+    fetchPatients();
+  } catch (error) {
+    console.error("Unable to save patient", error);
+    alert("Unable to save patient. Please try again.");
+  }
 });
 
 cancelEditBtn.addEventListener("click", () => {
@@ -249,21 +288,10 @@ appointmentForm.addEventListener("submit", async (e) => {
     );
 
     if (!response.ok) {
-      throw new Error("Failed to schedule appointment");
-    }
-
-    const createdAppointment = await response.json();
-    const selectedPatient = allPatientsCache.find(
-      (p) => p.id === appointmentPatient.value
-    );
-
-    if (selectedPatient) {
-      selectedPatient.appointments = selectedPatient.appointments || [];
-      selectedPatient.appointments.push(createdAppointment);
+      throw new Error(`Failed to schedule appointment: ${response.status}`);
     }
 
     appointmentForm.reset();
-    applyFilters();
     fetchPatients();
   } catch (error) {
     console.error("Unable to schedule appointment", error);
@@ -276,12 +304,12 @@ function editPatient(id) {
   if (!patient) return;
 
   editingPatientId = id;
-  document.getElementById("fullName").value = patient.fullName;
-  document.getElementById("age").value = patient.age;
-  document.getElementById("gender").value = patient.gender;
-  document.getElementById("phone").value = patient.phone;
-  document.getElementById("email").value = patient.email;
-  document.getElementById("medicalCondition").value = patient.medicalCondition;
+  document.getElementById("fullName").value = patient.fullName || "";
+  document.getElementById("age").value = patient.age || "";
+  document.getElementById("gender").value = patient.gender || "";
+  document.getElementById("phone").value = patient.phone || "";
+  document.getElementById("email").value = patient.email || "";
+  document.getElementById("medicalCondition").value = patient.medicalCondition || "";
 
   submitBtn.textContent = "Update Patient";
   cancelEditBtn.classList.remove("hidden");
@@ -304,16 +332,25 @@ async function deletePatient(id) {
 
   if (!shouldDelete) return;
 
-  await fetch(`${API_URL}/${id}`, {
-    method: "DELETE",
-  });
+  try {
+    const response = await fetch(`${API_URL}/${id}`, {
+      method: "DELETE",
+    });
 
-  if (editingPatientId === id) {
-    form.reset();
-    exitEditMode();
+    if (!response.ok) {
+      throw new Error(`Failed to delete patient: ${response.status}`);
+    }
+
+    if (editingPatientId === id) {
+      form.reset();
+      exitEditMode();
+    }
+
+    fetchPatients();
+  } catch (error) {
+    console.error("Unable to delete patient", error);
+    alert("Unable to delete patient. Please try again.");
   }
-
-  fetchPatients();
 }
 
 function exitEditMode() {

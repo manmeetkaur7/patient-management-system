@@ -8,15 +8,19 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Serve frontend
-app.use(express.static(path.join(__dirname, "../client")));
-
 // API routes
 const patientRoutes = require("./routes/patientRoutes");
 app.use("/api/patients", patientRoutes);
 
-// Root route
-app.get("/", (req, res) => {
+app.get("/api/health", (req, res) => {
+  res.status(200).json({ status: "ok" });
+});
+
+// Serve frontend after API routes so API requests never receive index.html.
+app.use(express.static(path.join(__dirname, "../client")));
+
+// Frontend fallback for Render/single-service deployments.
+app.get(/^\/(?!api).*/, (req, res) => {
   res.sendFile(path.join(__dirname, "../client/index.html"));
 });
 
