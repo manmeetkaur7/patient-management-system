@@ -12,6 +12,9 @@ const appointmentTime = document.getElementById("appointmentTime");
 const appointmentReason = document.getElementById("appointmentReason");
 const appointmentList = document.getElementById("appointmentList");
 const patientStatus = document.getElementById("patientStatus");
+const totalPatients = document.getElementById("totalPatients");
+const appointmentsCount = document.getElementById("appointmentsCount");
+const conditionsCount = document.getElementById("conditionsCount");
 
 function getApiBaseUrl() {
   const configuredUrl = (window.PATIENT_API_BASE_URL || "").trim();
@@ -67,9 +70,27 @@ function applyFilters() {
     ? allPatientsCache.filter((patient) => matchesSearch(patient, term))
     : [...allPatientsCache];
 
+  renderStats(allPatientsCache);
   renderPatients(patientsCache);
   populatePatientDropdown(allPatientsCache);
   renderAppointments(allPatientsCache);
+}
+
+function renderStats(patients) {
+  const totalAppointments = patients.reduce(
+    (sum, patient) => sum + (patient.appointments || []).length,
+    0
+  );
+  const uniqueConditions = new Set(
+    patients
+      .map((patient) => patient.medicalCondition)
+      .filter(Boolean)
+      .map((condition) => condition.trim().toLowerCase())
+  );
+
+  totalPatients.textContent = patients.length;
+  appointmentsCount.textContent = totalAppointments;
+  conditionsCount.textContent = uniqueConditions.size;
 }
 
 function matchesSearch(patient, term) {
@@ -96,6 +117,20 @@ function updatePatientStatus(message) {
   }
 }
 
+function escapeHTML(value) {
+  return String(value || "").replace(/[&<>"']/g, (char) => {
+    const entities = {
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#039;",
+    };
+
+    return entities[char];
+  });
+}
+
 function renderPatients(patients) {
   tableBody.innerHTML = "";
 
@@ -113,14 +148,16 @@ function renderPatients(patients) {
   patients.forEach((patient) => {
     const row = document.createElement("tr");
     const nextAppt = getNextAppointment(patient.appointments || []);
+    const patientName = escapeHTML(patient.fullName);
+    const condition = escapeHTML(patient.medicalCondition || "Not specified");
 
     row.innerHTML = `
-      <td>${patient.fullName || ""}</td>
-      <td>${patient.age || ""}</td>
-      <td>${patient.gender || ""}</td>
-      <td>${patient.phone || ""}</td>
-      <td>${patient.email || ""}</td>
-      <td>${patient.medicalCondition || ""}</td>
+      <td><strong>${patientName}</strong></td>
+      <td>${escapeHTML(patient.age)}</td>
+      <td>${escapeHTML(patient.gender)}</td>
+      <td>${escapeHTML(patient.phone)}</td>
+      <td>${escapeHTML(patient.email)}</td>
+      <td><span class="badge">${condition}</span></td>
       <td>${formatAppointment(nextAppt)}</td>
       <td class="actions">
         <button class="secondary" onclick="editPatient('${patient.id}')">Edit</button>
@@ -140,7 +177,7 @@ function populatePatientDropdown(patients) {
   patients.forEach((patient) => {
     const option = document.createElement("option");
     option.value = patient.id;
-    option.textContent = patient.fullName;
+    option.textContent = patient.fullName || "Unnamed patient";
     appointmentPatient.appendChild(option);
   });
 
@@ -176,9 +213,9 @@ function renderAppointments(patients) {
     .map(
       (appointment) => `
         <div class="appointment-card">
-          <h4>${appointment.patientName}</h4>
-          <p>${appointment.date} at ${appointment.time}</p>
-          <p>${appointment.reason}</p>
+          <h4>${escapeHTML(appointment.patientName)}</h4>
+          <p class="appointment-time">${escapeHTML(appointment.date)} at ${escapeHTML(appointment.time)}</p>
+          <p>${escapeHTML(appointment.reason)}</p>
         </div>
       `
     )
@@ -198,9 +235,9 @@ function getNextAppointment(appointments) {
 }
 
 function formatAppointment(appointment) {
-  if (!appointment) return "No appointment";
+  if (!appointment) return '<span class="empty-chip">No appointment</span>';
   const reasonText = appointment.reason ? ` - ${appointment.reason}` : "";
-  return `${appointment.date} ${appointment.time}${reasonText}`;
+  return escapeHTML(`${appointment.date} ${appointment.time}${reasonText}`);
 }
 
 form.addEventListener("submit", async (e) => {

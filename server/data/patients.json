@@ -7,7 +7,14 @@
     "phone": "916-555-9999",
     "email": "John12345@gmail.com",
     "medicalCondition": "Diabetes",
-    "appointments": []
+    "appointments": [
+      {
+        "id": "1776236169599",
+        "date": "2026-04-22",
+        "time": "14:00",
+        "reason": "follow-up"
+      }
+    ]
   },
   {
     "id": "1775590762508",

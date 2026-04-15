@@ -7,10 +7,42 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="container">
-    <h1>Patient Management System</h1>
+  <main class="app-shell">
+    <header class="topbar">
+      <div class="brand-block">
+        <img
+          src="https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&w=320&q=80"
+          alt="Clinician reviewing patient notes"
+          class="brand-image"
+        />
+        <div>
+          <p class="eyebrow">Clinic dashboard</p>
+          <h1>Patient Management System</h1>
+          <p class="subtitle">Records, appointments, and care details in one workspace.</p>
+        </div>
+      </div>
+    </header>
 
-    <section class="search-section">
+    <section class="stats-grid" aria-label="Patient summary">
+      <div class="stat-card">
+        <span>Total Patients</span>
+        <strong id="totalPatients">0</strong>
+      </div>
+      <div class="stat-card accent-green">
+        <span>Appointments</span>
+        <strong id="appointmentsCount">0</strong>
+      </div>
+      <div class="stat-card accent-coral">
+        <span>Care Conditions</span>
+        <strong id="conditionsCount">0</strong>
+      </div>
+    </section>
+
+    <section class="toolbar">
+      <div>
+        <p class="eyebrow">Find records</p>
+        <h2>Patient Directory</h2>
+      </div>
       <form id="searchForm" class="search-form">
         <input
           type="text"
@@ -18,66 +50,113 @@
           placeholder="Search by name, phone, email, or condition"
           aria-label="Search patients"
         />
-        <div class="form-actions inline">
-          <button type="submit">Search</button>
-          <button type="button" id="clearSearchBtn" class="secondary">Clear</button>
-        </div>
+        <button type="submit">Search</button>
+        <button type="button" id="clearSearchBtn" class="secondary">Clear</button>
       </form>
     </section>
 
-    <section>
-      <h2>Patient Details</h2>
-      <form id="patientForm" class="form-grid">
-        <input type="text" id="fullName" placeholder="Full Name" required />
-        <input type="number" id="age" placeholder="Age" required />
-        <input type="text" id="gender" placeholder="Gender" required />
-        <input type="text" id="phone" placeholder="Phone Number" required />
-        <input type="email" id="email" placeholder="Email" required />
-        <input type="text" id="medicalCondition" placeholder="Medical Condition" required />
-        <div class="form-actions">
-          <button type="submit" id="submitBtn">Add Patient</button>
-          <button type="button" id="cancelEditBtn" class="secondary hidden">Cancel Edit</button>
+    <section class="workspace-grid">
+      <section class="panel">
+        <div class="section-heading">
+          <p class="eyebrow">Registration</p>
+          <h2>Patient Details</h2>
         </div>
-      </form>
+        <form id="patientForm" class="form-grid">
+          <label>
+            Full Name
+            <input type="text" id="fullName" placeholder="Maya Patel" required />
+          </label>
+          <label>
+            Age
+            <input type="number" id="age" placeholder="34" required />
+          </label>
+          <label>
+            Gender
+            <input type="text" id="gender" placeholder="Female" required />
+          </label>
+          <label>
+            Phone Number
+            <input type="text" id="phone" placeholder="916-555-0123" required />
+          </label>
+          <label>
+            Email
+            <input type="email" id="email" placeholder="patient@email.com" required />
+          </label>
+          <label>
+            Medical Condition
+            <input type="text" id="medicalCondition" placeholder="Hypertension" required />
+          </label>
+          <div class="form-actions">
+            <button type="submit" id="submitBtn">Add Patient</button>
+            <button type="button" id="cancelEditBtn" class="secondary hidden">Cancel Edit</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="panel">
+        <div class="section-heading">
+          <p class="eyebrow">Calendar</p>
+          <h2>Schedule Appointment</h2>
+        </div>
+        <form id="appointmentForm" class="form-grid">
+          <label>
+            Patient
+            <select id="appointmentPatient" required>
+              <option value="">Select patient</option>
+            </select>
+          </label>
+          <label>
+            Date
+            <input type="date" id="appointmentDate" required />
+          </label>
+          <label>
+            Time
+            <input type="time" id="appointmentTime" required />
+          </label>
+          <label>
+            Reason
+            <input type="text" id="appointmentReason" placeholder="Follow-up visit" required />
+          </label>
+          <div class="form-actions">
+            <button type="submit">Schedule Appointment</button>
+          </div>
+        </form>
+      </section>
     </section>
 
-    <section>
-      <h2>Patient Records</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Age</th>
-            <th>Gender</th>
-            <th>Phone</th>
-            <th>Email</th>
-            <th>Condition</th>
-            <th>Next Appointment</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody id="patientTableBody"></tbody>
-      </table>
+    <section class="records-section">
+      <div class="section-heading">
+        <p class="eyebrow">Records</p>
+        <h2>Patient Records</h2>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Age</th>
+              <th>Gender</th>
+              <th>Phone</th>
+              <th>Email</th>
+              <th>Condition</th>
+              <th>Next Appointment</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="patientTableBody"></tbody>
+        </table>
+      </div>
       <p id="patientStatus" class="status muted hidden"></p>
     </section>
 
-    <section class="appointments">
-      <h2>Schedule Appointment</h2>
-      <form id="appointmentForm" class="form-grid">
-        <select id="appointmentPatient" required>
-          <option value="">Select patient</option>
-        </select>
-        <input type="date" id="appointmentDate" required />
-        <input type="time" id="appointmentTime" required />
-        <input type="text" id="appointmentReason" placeholder="Reason" required />
-        <div class="form-actions">
-          <button type="submit">Schedule Appointment</button>
-        </div>
-      </form>
-
+    <section class="appointments-panel">
+      <div class="section-heading">
+        <p class="eyebrow">Upcoming</p>
+        <h2>Appointments</h2>
+      </div>
       <div id="appointmentList" class="appointment-list"></div>
     </section>
-  </div>
+  </main>
 
   <script src="config.js"></script>
   <script src="script.js"></script>
