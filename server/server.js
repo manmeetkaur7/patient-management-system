@@ -8,17 +8,17 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Serve frontend (client folder)
+// Serve frontend
 app.use(express.static(path.join(__dirname, "../client")));
-
-// Route for homepage
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "../client/index.html"));
-});
 
 // API routes
 const patientRoutes = require("./routes/patientRoutes");
 app.use("/api/patients", patientRoutes);
+
+// Root route
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "../client/index.html"));
+});
 
 // Start server
 const PORT = process.env.PORT || 5000;

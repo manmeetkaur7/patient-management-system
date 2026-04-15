@@ -6,42 +6,30 @@ const path = require("path");
 const dataFilePath = path.join(__dirname, "../data/patients.json");
 
 function readPatients() {
+  if (!fs.existsSync(dataFilePath)) {
+    fs.writeFileSync(dataFilePath, "[]");
+  }
+
   const data = fs.readFileSync(dataFilePath, "utf8");
-  return JSON.parse(data);
+  return JSON.parse(data || "[]");
 }
 
 function writePatients(patients) {
   fs.writeFileSync(dataFilePath, JSON.stringify(patients, null, 2));
 }
 
-// Get all patients with optional search
+// Get all patients
 router.get("/", (req, res) => {
   try {
     const patients = readPatients();
-    const searchTerm = (req.query.search || "").toLowerCase();
-
-    const filteredPatients = searchTerm
-      ? patients.filter((patient) => {
-          const haystack = [
-            patient.fullName,
-            patient.email,
-            patient.phone,
-            patient.medicalCondition,
-          ]
-            .filter(Boolean)
-            .join(" ")
-            .toLowerCase();
-          return haystack.includes(searchTerm);
-        })
-      : patients;
-
-    res.status(200).json(filteredPatients);
+    res.status(200).json(patients);
   } catch (error) {
+    console.error("GET /api/patients error:", error);
     res.status(500).json({ message: "Error reading patient data" });
   }
 });
 
-// Add a patient
+// Add patient
 router.post("/", (req, res) => {
   try {
     const patients = readPatients();
@@ -62,11 +50,12 @@ router.post("/", (req, res) => {
 
     res.status(201).json(newPatient);
   } catch (error) {
+    console.error("POST /api/patients error:", error);
     res.status(500).json({ message: "Error saving patient data" });
   }
 });
 
-// Update a patient
+// Update patient
 router.put("/:id", (req, res) => {
   try {
     const patients = readPatients();
@@ -78,21 +67,28 @@ router.put("/:id", (req, res) => {
       return res.status(404).json({ message: "Patient not found" });
     }
 
-    const updatedPatient = {
+    const existingAppointments = patients[patientIndex].appointments || [];
+
+    patients[patientIndex] = {
       ...patients[patientIndex],
-      ...req.body,
+      fullName: req.body.fullName,
+      age: req.body.age,
+      gender: req.body.gender,
+      phone: req.body.phone,
+      email: req.body.email,
+      medicalCondition: req.body.medicalCondition,
+      appointments: existingAppointments,
     };
 
-    patients[patientIndex] = updatedPatient;
     writePatients(patients);
-
-    res.status(200).json(updatedPatient);
+    res.status(200).json(patients[patientIndex]);
   } catch (error) {
+    console.error("PUT /api/patients/:id error:", error);
     res.status(500).json({ message: "Error updating patient data" });
   }
 });
 
-// Delete a patient
+// Delete patient
 router.delete("/:id", (req, res) => {
   try {
     const patients = readPatients();
@@ -107,17 +103,20 @@ router.delete("/:id", (req, res) => {
     writePatients(filteredPatients);
     res.status(200).json({ message: "Patient deleted successfully" });
   } catch (error) {
+    console.error("DELETE /api/patients/:id error:", error);
     res.status(500).json({ message: "Error deleting patient data" });
   }
 });
 
-// Schedule an appointment for a patient
+// Add appointment
 router.post("/:id/appointments", (req, res) => {
   try {
     const patients = readPatients();
-    const patient = patients.find((p) => p.id === req.params.id);
+    const patientIndex = patients.findIndex(
+      (patient) => patient.id === req.params.id
+    );
 
-    if (!patient) {
+    if (patientIndex === -1) {
       return res.status(404).json({ message: "Patient not found" });
     }
 
@@ -128,12 +127,16 @@ router.post("/:id/appointments", (req, res) => {
       reason: req.body.reason,
     };
 
-    patient.appointments = patient.appointments || [];
-    patient.appointments.push(newAppointment);
+    if (!patients[patientIndex].appointments) {
+      patients[patientIndex].appointments = [];
+    }
+
+    patients[patientIndex].appointments.push(newAppointment);
     writePatients(patients);
 
     res.status(201).json(newAppointment);
   } catch (error) {
+    console.error("POST /api/patients/:id/appointments error:", error);
     res.status(500).json({ message: "Error scheduling appointment" });
   }
 });
